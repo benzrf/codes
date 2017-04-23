@@ -4,8 +4,13 @@
  * reading bits from some file descriptor.
  */
 typedef struct bits_in {
+    /* the file descriptor */
     int in;
+
+    /* a "buffer" of read-but-unconsumed bits */
     word buffer;
+
+    /* number of data bits in the buffer */
     byte buffer_length;
 } bits_in;
 #define BITS_IN(in) ((bits_in) {(in), 0, 0});
@@ -16,8 +21,15 @@ typedef struct bits_in {
  * Invariant: buffer_length should always be < WORD_BITS.
  */
 typedef struct bits_out {
+    /* the file descriptor */
     int out;
+
+    /* a "buffer" of read-but-unconsumed bits.
+     * we could technically buffer as little as a byte at a time,
+     * but this saves on write calls. */
     word buffer;
+
+    /* number of data bits in the buffer */
     byte buffer_length;
 } bits_out;
 #define BITS_OUT(out) ((bits_out) {(out), 0, 0});
