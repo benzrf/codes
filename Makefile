@@ -1,14 +1,13 @@
-CC=gcc
-CC_FLAGS=-c -Wall -Wpedantic -O2
+CC=gcc -Wall -Wpedantic -O2
 
 BINARY=lzw
-OBJECTS=sparse.o lzw.o
+OBJECTS=bit_io.o sparse.o lzw.o
 
-$(BINARY): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $(BINARY)
+$(BINARY): main.c $(OBJECTS)
+	$(CC) main.c $(OBJECTS) -o $(BINARY)
 
 %.o: %.c
-	$(CC) $(CC_FLAGS) $<
+	$(CC) -c $<
 
 clean:
 	rm -f $(OBJECTS) $(BINARY)
