@@ -3,19 +3,30 @@
 
 #include "bit_io.h"
 
-/* Get the next bit from the file descriptor.
- * Returns 0 or 1 normally, or -1 at EOF.
+/* Get some bits from the file descriptor and write them into
+ * the bits argument, zeroing the rest of it.
+ * Returns the number of input bits placed into the argument.
  */
-signed char read_bit(bits_in *bi) {
-    if (bi->buffer_length == 0) {
-        ssize_t nread = read(bi->in, &bi->buffer, WORD_BYTES);
-        if (nread == 0) return -1;
-        bi->buffer_length = nread * 8;
+byte read_bits(bits_in *bi, byte bit_count, word *bits) {
+    *bits = bi->buffer;
+    byte bits_set = bit_count;
+    if (bi->buffer_length >= bit_count) {
+        bi->buffer >>= bit_count;
+        bi->buffer_length -= bit_count;
     }
-    byte bit = bi->buffer & 1;
-    bi->buffer >>= 1;
-    bi->buffer_length--;
-    return bit;
+    else {
+        word input = 0;
+        byte bits_needed = bit_count - bi->buffer_length,
+             bits_read = read(bi->in, &input, WORD_BYTES) * 8;
+        if (bits_read < bits_needed) {
+            bits_set = bi->buffer_length + bits_read;
+        }
+        *bits |= input << bi->buffer_length;
+        bi->buffer = input >> bits_needed;
+        bi->buffer_length = bits_read - bits_needed;
+    }
+    *bits &= (1 << bits_set) - 1;
+    return bits_set;
 }
 
 /* Send up to WORD_BITS bits to the file descriptor.
@@ -65,5 +76,14 @@ void bits_out_example(void) {
     }
     int leftover = flush_bits(&bo);
     fprintf(stderr, "%d\n", leftover);
+}
+
+void bits_in_example(void) {
+    bits_in bi = BITS_IN(STDIN_FILENO);
+    for (int i = 1; i < 11; i++) {
+        word w;
+        read_bits(&bi, i, &w);
+        printf("%lu\n", w);
+    }
 }
 

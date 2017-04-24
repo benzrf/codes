@@ -48,14 +48,14 @@ void lzw_encode(int in, int out) {
      * So we need to manually take our first step before starting
      * the main loop; hence we read a byte right at the beginning. */
     byte next_byte;
-    if (!(next_byte = read(in, &next_byte, 1))) return;
+    if (!read(in, &next_byte, 1)) return;
 
-    /* maxix is the current largest code number. bit_count
-     * is the number of bits necessary to store maxix; we
+    /* max_ix is the current largest code number. bit_count
+     * is the number of bits necessary to store max_ix; we
      * store it redundantly to avoid recomputing. next_power
-     * is the next power of 2 after maxix; we'll know to
-     * increment bit_count when maxix reaches next_power. */
-    word maxix = 255, next_power = 256;
+     * is the next power of 2 after max_ix; we'll know to
+     * increment bit_count when max_ix reaches next_power. */
+    word max_ix = 255, next_power = 256;
     byte bit_count = 8;
     /* We special-case dict_root as an actual array since
      * we know for certain that it will be frequently traversed
@@ -85,13 +85,13 @@ void lzw_encode(int in, int out) {
             write_bits(&bo, bit_count, dict_cur->ix);
             /* ...make a new node for the unknown word, assigning
              * it the next index... */
-            maxix++;
-            if (maxix == next_power) {
+            max_ix++;
+            if (max_ix >= next_power) {
                 /* (start using more bits per code number if necessary) */
                 next_power <<= 1;
                 bit_count++;
             }
-            *next = bytetree_new(maxix);
+            *next = bytetree_new(max_ix);
             /* ...and then treat the symbol as the first symbol of
              * a new word. */
             dict_cur = dict_root[next_byte];

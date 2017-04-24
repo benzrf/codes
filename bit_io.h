@@ -34,7 +34,7 @@ typedef struct bits_out {
 } bits_out;
 #define BITS_OUT(out) ((bits_out) {(out), 0, 0});
 
-signed char read_bit(bits_in *bi);
+byte read_bits(bits_in *bi, byte bit_count, word *out);
 
 void write_bits(bits_out *bo, byte bit_count, word bits);
 byte flush_bits(bits_out *bo);
