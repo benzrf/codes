@@ -1,3 +1,4 @@
 - Document and gracefully handle overflow from fixed-size code numbers
 - Correctly handle I/O edge cases and errors
+- I think I have some while loops that should be for loops
 
