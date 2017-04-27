@@ -12,7 +12,7 @@ void pipeline(int in, int out, stage *steps) {
     for (; *(steps + 1) != NULL; steps++) {
         int fds[2];
         pipe(fds);
-        if (fork()) {
+        if (!fork()) {
             close(fds[0]);
             (*steps)(in, fds[1]);
             close(in);
@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
     SUB(hamming_id, hamming_encode, hamming_decode)
     SUB(encode,     lzw_encode, hamming_encode)
     SUB(decode,     hamming_decode, lzw_decode)
+    SUB(full_id,    lzw_encode, hamming_encode, hamming_decode, lzw_decode)
     else ERR(2, "unknown subcommand %s", argv[1])
     return 0;
 }

@@ -1,6 +1,6 @@
-#include <unistd.h>
 #include <stdlib.h>
 
+#include "byte_io.h"
 #include "bit_io.h"
 #include "lzw_decode.h"
 
@@ -28,7 +28,7 @@ void lzw_decode(int in, int out) {
 
     word next_ix;
     if (read_bits(&bi, 8, &next_ix) != 8) return;
-    write(out, &next_ix, 1);
+    write_byte(out, next_ix);
 
     word max_ix = 256, next_power = 512;
     byte bit_count = 9;
@@ -45,7 +45,7 @@ void lzw_decode(int in, int out) {
         }
         else if (next_ix == max_ix) {
             first = write_data_word(dict, prev, out);
-            write(out, &first, 1);
+            write_byte(out, first);
         }
         else {
             /* TODO: handle this gracefully */

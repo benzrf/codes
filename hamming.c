@@ -1,6 +1,6 @@
-#include <unistd.h>
 #include <stdlib.h>
 
+#include "byte_io.h"
 #include "hamming.h"
 
 typedef uint16_t byte2;
@@ -24,7 +24,7 @@ typedef uint16_t byte2;
 
 void hamming_encode(int in, int out) {
     byte next_byte;
-    while (read(in, &next_byte, 1)) {
+    while (read_byte(in, &next_byte)) {
         byte2 encoded = HAMMING_ENCODE_BYTE(next_byte);
         write(out, &encoded, 2);
     }
@@ -65,7 +65,7 @@ void hamming_encode(int in, int out) {
 void hamming_decode(int in, int out) {
     byte2 next_byte2;
     /* TODO: handle the case where it's only 1 byte */
-    while (read(in, &next_byte2, 2)) {
+    while (read_amap(in, &next_byte2, 2)) {
         byte check = HAMMING_CHECK_BYTE2(next_byte2),
              check_lo = check & 15,
              check_hi = check >> 4;
@@ -85,8 +85,7 @@ void hamming_decode(int in, int out) {
             /* TODO: deal with double error */
             exit(4);
         }
-        byte decoded = HAMMING_PROJECT(next_byte2);
-        write(out, &decoded, 1);
+        write_byte(out, HAMMING_PROJECT(next_byte2));
     }
 }
 

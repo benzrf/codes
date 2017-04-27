@@ -1,6 +1,6 @@
-#include <unistd.h>
 #include <stdio.h>
 
+#include "byte_io.h"
 #include "bit_io.h"
 
 /* Get some bits from the file descriptor and write them into
@@ -17,7 +17,7 @@ byte read_bits(bits_in *bi, byte bit_count, word *bits) {
     else {
         word input = 0;
         byte bits_needed = bit_count - bi->buffer_length,
-             bits_read = read(bi->in, &input, WORD_BYTES) * 8;
+             bits_read = read_amap(bi->in, &input, WORD_BYTES) * 8;
         if (bits_read < bits_needed) {
             bits_set = bi->buffer_length + bits_read;
         }
@@ -39,8 +39,7 @@ void write_bits(bits_out *bo, byte bit_count, word bits) {
         /* if we're writing enough bits to fill our buffer,
          * write the filled buffer and replace the buffer with
          * the excess bits (if any) */
-        word bytes = bo->buffer | (bits << bo->buffer_length);
-        write(bo->out, &bytes, WORD_BYTES);
+        write_word(bo->out, bo->buffer | (bits << bo->buffer_length));
         bo->buffer = bits >> bits_left;
         bo->buffer_length = bit_count - bits_left;
     }

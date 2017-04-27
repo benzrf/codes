@@ -1,6 +1,6 @@
-#include <unistd.h>
 #include <stdlib.h>
 
+#include "byte_io.h"
 #include "bit_io.h"
 #include "sparse.h"
 #include "lzw_encode.h"
@@ -48,7 +48,7 @@ void lzw_encode(int in, int out) {
      * So we need to manually take our first step before starting
      * the main loop; hence we read a byte right at the beginning. */
     byte next_byte;
-    if (!read(in, &next_byte, 1)) return;
+    if (!read_byte(in, &next_byte)) return;
 
     /* max_ix is the current largest code number. bit_count
      * is the number of bits necessary to store max_ix; we
@@ -70,7 +70,7 @@ void lzw_encode(int in, int out) {
     /* the "current node" */
     bytetree *dict_cur = dict_root[next_byte];
 
-    while (read(in, &next_byte, 1)) {
+    while (read_byte(in, &next_byte)) {
         bytetree **next =
             (bytetree**)sparse_at(dict_cur->children, next_byte);
         if (*next != NULL) {
