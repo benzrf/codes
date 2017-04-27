@@ -4,6 +4,7 @@
 
 #include "lzw_encode.h"
 #include "lzw_decode.h"
+#include "hamming.h"
 
 typedef void (*const stage)(int, int);
 
@@ -39,7 +40,12 @@ int main(int argc, char *argv[]) {
     if (argc < 2) ERR(1, "no subcommand given")
     SUB(compress,   lzw_encode)
     SUB(decompress, lzw_decode)
-    SUB(id,         lzw_encode, lzw_decode)
+    SUB(lzw_id,     lzw_encode, lzw_decode)
+    SUB(augment,    hamming_encode)
+    SUB(correct,    hamming_decode)
+    SUB(hamming_id, hamming_encode, hamming_decode)
+    SUB(encode,     lzw_encode, hamming_encode)
+    SUB(decode,     hamming_decode, lzw_decode)
     else ERR(2, "unknown subcommand %s", argv[1])
     return 0;
 }
