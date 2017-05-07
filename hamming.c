@@ -75,7 +75,7 @@ void hamming_decode(int in, int out) {
             next_byte2 ^= 1 << check_lo;
         }
         else if (check_lo) {
-            WHINE("hamming_decode: double error in byte %x\n",
+            WHINE("hamming_decode: double error in byte %02x\n",
                     next_byte2 & 0xFF);
         }
         if (check_hi & 8) {
@@ -83,7 +83,7 @@ void hamming_decode(int in, int out) {
             next_byte2 ^= 1 << (check_hi + 8);
         }
         else if (check_hi) {
-            WHINE("hamming_decode: double error in byte %x\n",
+            WHINE("hamming_decode: double error in byte %02x\n",
                     next_byte2 >> 8);
         }
         write_byte(out, HAMMING_PROJECT(next_byte2));

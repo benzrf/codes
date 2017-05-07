@@ -1,5 +1,6 @@
 #include <stdint.h>
 
+/* just some convenient aliases */
 typedef uint8_t byte;
 typedef uintmax_t word;
 #define WORD_BYTES sizeof(word)

@@ -5,8 +5,18 @@
 #include "lzw_decode.h"
 #include "hamming.h"
 
+/* A "stage" is a given encoding or decoding function:
+ * Something that takes two file descriptors and doesn't
+ * return anything in particular.
+ */
 typedef void (*const stage)(int, int);
 
+/* Given initial input and final output file descriptors
+ * and a NULL-terminated array of stages, fork off child
+ * processes running stage (except the last one, which
+ * runs in the original process), connecting them with
+ * pipes.
+ */
 void pipeline(int in, int out, stage *steps) {
     for (; *(steps + 1) != NULL; steps++) {
         int fds[2];
@@ -26,27 +36,34 @@ void pipeline(int in, int out, stage *steps) {
     close(out);
 }
 
-#define SUB(c, ...) else if (!strcmp(argv[1], #c)) {\
+/* We list the various subcommands in subcommands.h, as calls
+ * to the SUB macro that pass the subcommand name followed
+ * by the pipeline stages to run. We'll use the list twice:
+ * Once to generate a help message, and once to generate the
+ * code that actually runs a pipeline based on the subcommand.
+ * To achieve that, we'll just include subcommands.h once in
+ * each place, defining SUB differently each time. Here are
+ * the two versions of SUB.
+ */
+#define SUB_help(c, ...) WHINE(#c ": pipeline of " #__VA_ARGS__ "\n");
+#define SUB_branch(c, ...) else if (!strcmp(argv[1], #c)) {\
     const stage p[] = {__VA_ARGS__, NULL};\
     pipeline(STDIN_FILENO, STDOUT_FILENO, p);\
 }
-#define ERR(code, msg, ...) {\
-    WHINE("%s: " msg "\n", argv[0], ##__VA_ARGS__);\
-    return code;\
-}
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) ERR(1, "no subcommand given")
-    SUB(compress,   lzw_encode)
-    SUB(decompress, lzw_decode)
-    SUB(lzw_id,     lzw_encode, lzw_decode)
-    SUB(augment,    hamming_encode)
-    SUB(correct,    hamming_decode)
-    SUB(hamming_id, hamming_encode, hamming_decode)
-    SUB(encode,     lzw_encode, hamming_encode)
-    SUB(decode,     hamming_decode, lzw_decode)
-    SUB(full_id,    lzw_encode, hamming_encode, hamming_decode, lzw_decode)
-    else ERR(2, "unknown subcommand %s", argv[1])
+    if (argc < 2) {
+        WHINE("%s: no subcommand given. Use one of:\n\n", argv[0]);
+#define SUB SUB_help
+#include "subcommands.h"
+        return 1;
+    }
+#define SUB SUB_branch
+#include "subcommands.h"
+    else {
+        WHINE("%s: unknown subcommand %s\n", argv[0], argv[1]);
+        return 2;
+    }
     return 0;
 }
 

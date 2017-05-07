@@ -8,23 +8,39 @@
  * Returns the number of input bits placed into the argument.
  */
 byte read_bits(bits_in *bi, byte bit_count, word *bits) {
+    /* We're going to branch, and in each branch, we will record
+     * how many bits we set. Then, afterward, we'll clear any
+     * unset bits. So it's OK to just copy the whole buffer to
+     * begin with. */
     *bits = bi->buffer;
+    /* in most cases, the number of bits we set will be the number
+     * of bits requested, so we'll assume that to begin with, and
+     * change it if necessary */
     byte bits_set = bit_count;
     if (bi->buffer_length >= bit_count) {
+        /* if the buffer already has as many bits as we want,
+         * all we need to do for this branch is remove them
+         * from the buffer */
         bi->buffer >>= bit_count;
         bi->buffer_length -= bit_count;
     }
     else {
+        /* otherwise, we need to do some reading and some
+         * slightly-more-advanced buffer juggling */
         word input = 0;
         byte bits_needed = bit_count - bi->buffer_length,
+             /* read an entire word at a time even if we need less,
+              * to save on read calls—we can just buffer the rest */
              bits_read = read_amap(bi->in, &input, WORD_BYTES) * 8;
         if (bits_read < bits_needed) {
             bits_set = bi->buffer_length + bits_read;
         }
         *bits |= input << bi->buffer_length;
+        /* aforementioned buffer juggling */
         bi->buffer = input >> bits_needed;
         bi->buffer_length = bits_read - bits_needed;
     }
+    /* aforementioned clearing of unset bits */
     *bits &= (1 << bits_set) - 1;
     return bits_set;
 }
