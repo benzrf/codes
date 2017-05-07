@@ -52,7 +52,7 @@ void lzw_decode(int in, int out) {
             WHINE("lzw_decode: invalid index %lu\n", next_ix);
             invalid++;
             if (invalid >= 10) {
-                WHINE("exiting after 10 invalid indices; "
+                WHINE("lzw_decode: exiting after 10 invalid indices; "
                         "input is probably corrupt\n");
                 exit(3);
             }
