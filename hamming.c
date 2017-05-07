@@ -64,8 +64,9 @@ void hamming_encode(int in, int out) {
 
 void hamming_decode(int in, int out) {
     byte2 next_byte2;
-    /* TODO: handle the case where it's only 1 byte */
-    while (read_amap(in, &next_byte2, 2)) {
+    int nread;
+    while ((nread = read_amap(in, &next_byte2, 2))) {
+        if (nread == 1) next_byte2 &= 0xFF;
         byte check = HAMMING_CHECK_BYTE2(next_byte2),
              check_lo = check & 15,
              check_hi = check >> 4;
@@ -74,16 +75,16 @@ void hamming_decode(int in, int out) {
             next_byte2 ^= 1 << check_lo;
         }
         else if (check_lo) {
-            /* TODO: deal with double error */
-            exit(4);
+            WHINE("hamming_decode: double error in byte %x\n",
+                    next_byte2 & 0xFF);
         }
         if (check_hi & 8) {
             check_hi = (check_hi - 1) & 7;
             next_byte2 ^= 1 << (check_hi + 8);
         }
         else if (check_hi) {
-            /* TODO: deal with double error */
-            exit(4);
+            WHINE("hamming_decode: double error in byte %x\n",
+                    next_byte2 >> 8);
         }
         write_byte(out, HAMMING_PROJECT(next_byte2));
     }

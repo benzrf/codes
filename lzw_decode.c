@@ -38,6 +38,7 @@ void lzw_decode(int in, int out) {
     }
     int prev = next_ix;
 
+    int invalid = 0;
     while (read_bits(&bi, bit_count, &next_ix) == bit_count) {
         byte first;
         if (next_ix < max_ix) {
@@ -48,8 +49,14 @@ void lzw_decode(int in, int out) {
             write_byte(out, first);
         }
         else {
-            /* TODO: handle this gracefully */
-            exit(3);
+            WHINE("lzw_decode: invalid index %lu\n", next_ix);
+            invalid++;
+            if (invalid >= 10) {
+                WHINE("exiting after 10 invalid indices; "
+                        "input is probably corrupt\n");
+                exit(3);
+            }
+            first = 0;
         }
         max_ix++;
         if (max_ix >= next_power) {

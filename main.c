@@ -1,6 +1,5 @@
 #include <unistd.h>
 #include <string.h>
-#include <stdio.h>
 
 #include "lzw_encode.h"
 #include "lzw_decode.h"
@@ -32,7 +31,7 @@ void pipeline(int in, int out, stage *steps) {
     pipeline(STDIN_FILENO, STDOUT_FILENO, p);\
 }
 #define ERR(code, msg, ...) {\
-    fprintf(stderr, "%s: " msg "\n", argv[0], ##__VA_ARGS__);\
+    WHINE("%s: " msg "\n", argv[0], ##__VA_ARGS__);\
     return code;\
 }
 
