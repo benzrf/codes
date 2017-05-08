@@ -34,7 +34,10 @@
 import sys
 import random
 
-bitflip_probability_log2 = 10   #  i.e. 2**-10 chance of a bit flip
+try:
+    bitflip_probability_log2 = int(sys.argv[1])
+except IndexError:
+    bitflip_probability_log2 = 10   #  i.e. 2**-10 chance of a bit flip
 
 def odds(poweroftwo):
     """ Return True with odds 2**-poweroftwo , else False

@@ -62,6 +62,9 @@ byte write_data_word(data_word *dict, int ix, int out) {
     return buf[0];
 }
 
+/* Perform LZW decoding, reading from file descriptor in and
+ * writing to file descriptor out.
+ */
 void lzw_decode(int in, int out) {
     /* lzw_encode's output is bit-packed, so we'll use a
      * bits_in to get our input. */
