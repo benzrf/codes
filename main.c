@@ -61,7 +61,9 @@ int main(int argc, char *argv[]) {
 #define SUB SUB_branch
 #include "subcommands.h"
     else {
-        WHINE("%s: unknown subcommand %s\n", argv[0], argv[1]);
+        WHINE("%s: unknown subcommand %s. "
+                "Run without arguments for a list of subcommands. \n",
+                argv[0], argv[1]);
         return 2;
     }
     return 0;
